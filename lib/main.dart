@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'services/session/session_manager.dart';
+import 'services/file_sharing/file_sharing_service.dart';
 import 'features/home/home_screen.dart';
 
 void main() async {
@@ -35,6 +36,7 @@ class WiFiPortApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SessionManager()),
+        ChangeNotifierProvider(create: (_) => FileSharingService()),
       ],
       child: MaterialApp(
         title: 'WiFiPort',

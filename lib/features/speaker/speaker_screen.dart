@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/colors.dart';
 import '../../services/session/session_manager.dart';
+import '../../services/file_sharing/file_sharing_service.dart';
 import '../../widgets/microphone_icon.dart';
 import '../../widgets/qr_display.dart';
 import '../../widgets/connection_indicator.dart';
+import '../../widgets/file_sharing_panel.dart';
 
 class SpeakerScreen extends StatefulWidget {
   const SpeakerScreen({super.key});
@@ -32,7 +34,14 @@ class _SpeakerScreenState extends State<SpeakerScreen>
 
   Future<void> _initializeSpeaker() async {
     final session = context.read<SessionManager>();
+    final fileService = context.read<FileSharingService>();
+    
     final success = await session.startAsSpeaker();
+    
+    if (success) {
+      // Start the file sharing server
+      await fileService.startServer();
+    }
     
     if (mounted) {
       setState(() {
@@ -224,6 +233,11 @@ class _SpeakerScreenState extends State<SpeakerScreen>
           
           // Control buttons
           _buildControlButtons(session),
+          
+          const SizedBox(height: 32),
+          
+          // File sharing panel
+          const FileSharingPanel(),
           
           const SizedBox(height: 32),
         ],

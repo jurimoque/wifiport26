@@ -3,7 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/theme/colors.dart';
 import '../../services/session/session_manager.dart';
+import '../../services/network/discovery_service.dart';
+import '../../services/file_sharing/file_sharing_service.dart';
 import '../../widgets/connection_indicator.dart';
+import '../../widgets/received_files_viewer.dart';
 
 class ListenerScreen extends StatefulWidget {
   const ListenerScreen({super.key});
@@ -15,9 +18,11 @@ class ListenerScreen extends StatefulWidget {
 class _ListenerScreenState extends State<ListenerScreen> {
   final _pinController = TextEditingController();
   final _ipController = TextEditingController();
+  final _discoveryService = DiscoveryService();
   bool _showScanner = true;
   bool _isConnecting = false;
   MobileScannerController? _scannerController;
+  String? _speakerIp;
 
   @override
   void initState() {
@@ -43,6 +48,12 @@ class _ListenerScreenState extends State<ListenerScreen> {
       _isConnecting = true;
     });
     
+    // Parse the connection data to get the speaker IP
+    final connectionInfo = _discoveryService.parseConnectionUri(data);
+    if (connectionInfo != null) {
+      _speakerIp = connectionInfo.ip;
+    }
+    
     final session = context.read<SessionManager>();
     final success = await session.connectAsListener(data);
     
@@ -52,6 +63,7 @@ class _ListenerScreenState extends State<ListenerScreen> {
       });
       
       if (!success) {
+        _speakerIp = null;
         _showErrorSnackbar(session.error ?? 'Error de conexión');
       }
     }
@@ -378,39 +390,39 @@ class _ListenerScreenState extends State<ListenerScreen> {
                 colors: [AppColors.background, Colors.white],
               ),
       ),
-      child: Column(
-        children: [
-          const Spacer(),
-          
-          // Audio visualization placeholder
-          _AudioVisualization(isPlaying: session.state == SessionState.streaming),
-          
-          const SizedBox(height: 32),
-          
-          // Connection quality
-          const ConnectionIndicator(
-            quality: ConnectionQuality.excellent,
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Status text
-          Text(
-            session.state == SessionState.streaming
-                ? 'Recibiendo audio...'
-                : 'Conectado',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.success,
-              fontWeight: FontWeight.w600,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            
+            // Audio visualization placeholder
+            _AudioVisualization(isPlaying: session.state == SessionState.streaming),
+            
+            const SizedBox(height: 24),
+            
+            // Connection quality
+            const ConnectionIndicator(
+              quality: ConnectionQuality.excellent,
             ),
-          ),
-          
-          const Spacer(),
-          
-          // Volume control (placeholder)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48),
-            child: Row(
+            
+            const SizedBox(height: 12),
+            
+            // Status text
+            Text(
+              session.state == SessionState.streaming
+                  ? 'Recibiendo audio...'
+                  : 'Conectado',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.success,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Volume control (placeholder)
+            Row(
               children: [
                 const Icon(Icons.volume_down_rounded, color: AppColors.textSecondary),
                 Expanded(
@@ -426,14 +438,17 @@ class _ListenerScreenState extends State<ListenerScreen> {
                 const Icon(Icons.volume_up_rounded, color: AppColors.textSecondary),
               ],
             ),
-          ),
-          
-          const SizedBox(height: 32),
-          
-          // Disconnect button
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: SizedBox(
+            
+            const SizedBox(height: 32),
+            
+            // Received files viewer
+            if (_speakerIp != null)
+              ReceivedFilesViewer(speakerIp: _speakerIp!),
+            
+            const SizedBox(height: 32),
+            
+            // Disconnect button
+            SizedBox(
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () async {
@@ -448,10 +463,10 @@ class _ListenerScreenState extends State<ListenerScreen> {
                 child: const Text('Desconectar'),
               ),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-        ],
+            
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#004A54"/>
+  
+  <!-- WiFi arcs -->
+  <g fill="none" stroke="#33C4B4" stroke-width="24" stroke-linecap="round">
+    <path d="M 156 300 A 100 100 0 0 1 356 300" opacity="0.5"/>
+    <path d="M 186 280 A 70 70 0 0 1 326 280" opacity="0.7"/>
+    <path d="M 216 260 A 40 40 0 0 1 296 260" opacity="0.9"/>
+  </g>
+  
+  <!-- Center dot (audio source) -->
+  <circle cx="256" cy="320" r="20" fill="#33C4B4"/>
+  
+  <!-- Sound wave indicators -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.6">
+    <path d="M 220 340 Q 200 360 220 380"/>
+    <path d="M 292 340 Q 312 360 292 380"/>
+  </g>
+</svg>
